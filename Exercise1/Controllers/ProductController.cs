@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Exercise1.Models;
+using Exercise1.Repository;
 
 namespace ProductController.Controllers
 {
@@ -9,35 +10,26 @@ namespace ProductController.Controllers
     [Route("api/products")]
     public class ProductController : ControllerBase
     {
-        private List<Product> products = new List<Product>
+        private readonly IProductRepository _productRepository;
+        public ProductController(IProductRepository productRepository)
         {
-            new Product { Id = 1, Name = "Product 1", Price = 10.99 },
-            new Product { Id = 2, Name = "Product 2", Price = 19.99 }
-        };
+            _productRepository = productRepository;
+        }
+        
 
-        // Ürünleri listeleme ve sıralama işlevi
+        // Ürünleri listeleme
         [HttpGet("list")]
-        public ActionResult<List<Product>> GetProducts([FromQuery] string name)
+        public async Task<ActionResult<List<Product>>> GetProducts()
         {
-            if (!string.IsNullOrEmpty(name))
-            {
-                var filteredProducts = products.FindAll(p => p.Name == name);
-                filteredProducts.Sort((x, y) => x.Price.CompareTo(y.Price));
-                return filteredProducts;
-            }
-            else
-            {
-                var sortedProducts = new List<Product>(products);
-                sortedProducts.Sort((x, y) => x.Price.CompareTo(y.Price));
-                return sortedProducts;
-            }
+            var products = await _productRepository.GetProductsAsync();
+            return Ok(products);
         }
 
         // Ürün getirme işlevi
         [HttpGet("{id}")]
-        public ActionResult<Product> GetProduct(int id)
+        public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var product = products.Find(p => p.Id == id);
+            var product = await _productRepository.GetProductAsync(id);
 
             if (product != null)
             {
@@ -51,31 +43,30 @@ namespace ProductController.Controllers
 
         // Ürün ekleme işlevi
         [HttpPost]
-        public ActionResult<Product> AddProduct([FromBody] Product product)
+        public async Task<ActionResult<Product>> AddProduct([FromBody] Product product)
         {
-            if (product == null || string.IsNullOrEmpty(product.Name) || product.Price <= 0)
+            if (_productRepository.IsProductValid(product) == false)
             {
                 return BadRequest(new { message = "Missing required fields" });
             }
 
-            product.Id = products.Count + 1;
-            products.Add(product);
+            product = await _productRepository.AddProductAsync(product);
 
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
         }
 
         // Ürün güncelleme işlevi
         [HttpPut("{id}")]
-        public ActionResult<Product> UpdateProduct(int id, [FromBody] Product product)
+        public async Task<ActionResult<Product>> UpdateProduct(int id, [FromBody] Product product)
         {
-            var existingProduct = products.Find(p => p.Id == id);
+            var existingProduct = await _productRepository.GetProductAsync(id);
 
             if (existingProduct == null)
             {
                 return NotFound(new { message = "Product not found" });
             }
 
-            if (product == null || string.IsNullOrEmpty(product.Name) || product.Price <= 0)
+            if (_productRepository.IsProductValid(product) == false)
             {
                 return BadRequest(new { message = "Missing required fields" });
             }
@@ -83,21 +74,23 @@ namespace ProductController.Controllers
             existingProduct.Name = product.Name;
             existingProduct.Price = product.Price;
 
+            existingProduct = await _productRepository.UpdateProductAsync(existingProduct);
+
             return Ok(existingProduct);
         }
 
         // Ürün silme işlevi
         [HttpDelete("{id}")]
-        public ActionResult DeleteProduct(int id)
+        public async Task<ActionResult> DeleteProduct(int id)
         {
-            var product = products.Find(p => p.Id == id);
+            var product = await _productRepository.GetProductAsync(id);
 
             if (product == null)
             {
                 return NotFound(new { message = "Product not found" });
             }
 
-            products.Remove(product);
+            await _productRepository.DeleteProductAsync(id);
             return NoContent();
         }
     }
