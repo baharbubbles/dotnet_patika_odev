@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using BookStore.BookOperations.CreateBook;
 using BookStore.BookOperations.GetBooks;
@@ -23,7 +20,6 @@ namespace BookStore.AddControllers
             _context = context;
         }
         
-        //Http requestleri yakalayacak metotlar
 
         [HttpGet]
         public IActionResult GetBooks()
@@ -42,14 +38,7 @@ namespace BookStore.AddControllers
             return Ok(result);
         }  
 
-        // [HttpGet]
-        // public Book Get([FromQuery] string id)
-        // {
-        //     var book =  _context.Books.Where(x => x.Id==Convert.ToInt32(id)).SingleOrDefault();
-        //     return book;  
-        // } 
-
-        //post
+  
 
         [HttpPost]
         public IActionResult AddBook([FromBody] CreateBookModel model)
@@ -67,7 +56,7 @@ namespace BookStore.AddControllers
             return Ok();
         }
 
-        //put
+      
 
         [HttpPut("{id}")]
         public IActionResult UpdateBook(int id,[FromBody] PutCommandModel updatedBook)
@@ -85,7 +74,6 @@ namespace BookStore.AddControllers
             return Ok();
         }
 
-        //Delete
         [HttpDelete("{id}")]
         public IActionResult DeleteBook(int id)
         {

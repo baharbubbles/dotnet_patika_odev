@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using BookStore.Common;
 using BookStore.DBOperations;
 
@@ -18,13 +15,8 @@ namespace BookStore.BookOperations.GetByIdQuery
 
         public BooksViewModel Handle(){
             var book =  _dbContext.Books.Where(x => x.Id == BookId).SingleOrDefault();
-            // if (book is null)
-            // {
-            //     throw new InvalidOperationException("Kitap bulunamadı");
-            // }
+            
 
-
-            //Burada new lemek ile yukarıda new lwmwk arasındaki fark 
             BooksViewModel Model = new BooksViewModel();
 
             Model.Title = book.Title;

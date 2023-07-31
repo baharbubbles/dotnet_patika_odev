@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using BookStore.Common;
 using BookStore.DBOperations;
 
 namespace BookStore.BookOperations.PutBookCommand
