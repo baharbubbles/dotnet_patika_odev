@@ -1,4 +1,4 @@
-using BookStore.Common;
+using AutoMapper;
 using BookStore.DBOperations;
 
 namespace BookStore.BookOperations.GetByIdQuery
@@ -7,28 +7,28 @@ namespace BookStore.BookOperations.GetByIdQuery
     {
         public int BookId {get; set;}
         private readonly BookStoreDbContext _dbContext;
-        public GetByIdQuery(BookStoreDbContext dbContext,int id)
+        private readonly IMapper _mapper;
+        public GetByIdQuery(BookStoreDbContext dbContext,int id, IMapper mapper)
         {
             BookId=id;
             _dbContext=dbContext;
+            _mapper = mapper;
         }
 
-        public BooksViewModel Handle(){
+        public BooksDetailViewModel Handle(){
             var book =  _dbContext.Books.Where(x => x.Id == BookId).SingleOrDefault();
-            
+            if (book is null)
+            {
+                throw new InvalidOperationException("Kitap bulunamadı");
+            }
 
-            BooksViewModel Model = new BooksViewModel();
-
-            Model.Title = book.Title;
-            Model.PageCount=book.PageCount;
-            Model.PublishDate=book.PublishDate;
-            Model.Genre=((GenreEnum)book.GenreId).ToString();
+            BooksDetailViewModel Model = _mapper.Map<BooksDetailViewModel>(book); 
 
             return Model;
         }
     }
 
-    public class BooksViewModel
+    public class BooksDetailViewModel
     {
         public string Title { get; set; }
         public int PageCount { get; set; }
