@@ -2,8 +2,9 @@ namespace BookStore.Common
 {
     public enum GenreEnum
     {
-        PersonalGrowth = 1,
+        PersonalGrowth,
         ScienceFiction,
         Noval,
+        History
     }
 }
